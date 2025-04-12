@@ -1,0 +1,33 @@
+{% extends 'base.html' %} 
+{% block title %}
+{% if form.instance.pk %}
+Редактировать задачу
+{% else %}
+Создать задачу
+{% endif %}
+{% endblock %} 
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h2>
+      {% if form.instance.pk %}Редактирование задачи{% else %}Новая задача{% endif %}
+    </h2>
+  </div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %} {{ form.as_p }}
+      <button type="submit" class="btn btn-primary">
+        {% if form.instance.pk %}Сохранить{% else %}Создать{% endif %}
+      </button>
+      <a href="{% url 'task_list' %}" class="btn btn-secondary">Отмена</a>
+    </form>
+  </div>
+</div>
+{% if form.non_field_errors %}
+    <div class="alert alert-danger">
+        {% for error in form.non_field_errors %}
+            {{ error }}
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}

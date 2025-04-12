@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="alert alert-danger">
+    <h4>Доступ запрещен</h4>
+    <p>Вы не имеете прав для выполнения этого действия.</p>
+    <p>{{ exception }}</p>
+    <a href="{% url 'task_list' %}" class="btn btn-primary">Вернуться к списку задач</a>
+</div>
+{% endblock %}

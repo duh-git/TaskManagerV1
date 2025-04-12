@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои задачи{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Мои задачи</h1>
+
+<!-- Фильтры -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="get" action="{% url 'task_list' %}">
+                    <div class="input-group">
+                        <input type="text" 
+                               name="search" 
+                               class="form-control" 
+                               placeholder="Поиск по описанию..." 
+                               value="{{ request.GET.search }}">
+                        <button class="btn btn-outline-secondary" type="submit">
+                            <i class="bi bi-search"></i> Найти
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <form method="get" class="row g-3">
+            {% if request.GET.search %}
+                <input type="hidden" name="search" value="{{ request.GET.search }}">
+            {% endif %}
+            <div class="col-md-3">
+                <label class="form-label">Статус</label>
+                <select name="status" class="form-select">
+                    <option value="">Все</option>
+                    {% for key, value in status_choices.items %}
+                        <option value="{{ key }}" 
+                            {% if current_filters.status == key|stringformat:"s" %}selected{% endif %}>
+                            {{ value }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Приоритет</label>
+                <select name="priority" class="form-select">
+                    <option value="">Все</option>
+                    {% for key, value in priority_choices.items %}
+                        <option value="{{ key }}" 
+                            {% if current_filters.priority == key|stringformat:"s" %}selected{% endif %}>
+                            {{ value }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Дата окончания</label>
+                <input type="date" name="due_date" class="form-control" value="{{ request.GET.due_date }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Владелец</label>
+                <select name="owner" class="form-select">
+                    <option value="">Все</option>
+                    {% for user in all_users %}
+                        <option value="{{ user.username }}" 
+                            {% if request.GET.owner == user.username %}selected{% endif %}>
+                            {{ user.username }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary">Фильтровать</button>
+                <a href="{% url 'task_list' %}" class="btn btn-outline-secondary">Сбросить</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Кнопки для сложных запросов -->
+<div class="mb-4">
+    <a href="{% url 'due_soon_tasks' %}" class="btn btn-info btn-sm">Ближайшие 7 дней</a>
+    <a href="{% url 'high_priority_tasks' %}" class="btn btn-danger btn-sm">Высокий приоритет</a>
+    <a href="{% url 'overdue_tasks' %}" class="btn btn-dark btn-sm">Просроченные</a>
+    <a href="{% url 'task_create' %}" class="btn btn-success float-end">+ Создать задачу</a>
+</div>
+
+<!-- Таблица задач -->
+<table class="table table-hover">
+    <thead class="table-light">
+        <tr>
+            <th>Название</th>
+            <th>Владелец</th>
+            <th>Статус</th>
+            <th>Приоритет</th>
+            <th>Дата окончания</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for task in tasks %}
+        <tr>
+            <td><a href="{% url 'task_detail' task.pk %}">{{ task.title }}</a></td>
+            <td>{{ task.owner.username }}</td>
+            <td><span class="badge bg-{% if task.status == 'C' %}success{% elif task.status == 'X' %}secondary{% else %}warning{% endif %}">
+                {{ task.get_status_display }}
+            </span></td>
+            <td>{{ task.get_priority_display }}</td>
+            <td>{{ task.due_date|date:"d.m.Y" }}</td>
+            <td>
+                <a href="{% url 'task_update' task.pk %}" class="btn btn-sm btn-outline-primary">✏️</a>
+                <a href="{% url 'task_delete' task.pk %}" class="btn btn-sm btn-outline-danger">🗑️</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="text-center">Задачи не найдены.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% comment %} <a href="{% url 'export_excel' %}" class="btn btn-success">
+    <i class="bi bi-file-excel"></i> Экспорт в Excel
+</a> {% endcomment %}
+{% endblock %}
